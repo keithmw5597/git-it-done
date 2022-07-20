@@ -22,7 +22,7 @@ var getRepoName = function() {
 
 var getRepoIssues = function(repo) {
     var apiUrl = "https://api.github.com/repos/" + repo + "/issues?direction=asc";
-
+    //make a get request to url
     fetch(apiUrl).then(function(response) {
         // request was successful
         if (response.ok) {
@@ -30,12 +30,13 @@ var getRepoIssues = function(repo) {
                 displayIssues(data);
 
                 //check if api has paginated issues
-                if(response.headers.get("Link")){
+                if(response.headers.get("Link")) {
                     displayWarning(repo);
                 }
             });
         }
         else {
+            // if not successful, redirect to homepage
             document.location.replace("./index.html");
         }
     });

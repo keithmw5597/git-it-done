@@ -1,6 +1,8 @@
 var repoContainerEl = document.querySelector("#repos-container");
 var repoSearchTerm = document.querySelector("#repo-search-term");
-
+var userFormEl = document.querySelector("#user-form");
+var nameInputEl = document.querySelector("#username");
+var languageButtonsEl = document.querySelector("#language-buttons");
 
 var getUserRepos = function(user) {
     // format the github api url
@@ -23,9 +25,31 @@ var getUserRepos = function(user) {
       })
   };
 
+var buttonClickHandler = function(event) {
+    var language = event.target.getAttribute("data-language");
 
-var userFormEl = document.querySelector("#user-form");
-var nameInputEl = document.querySelector("#username");
+    if(language) {
+        getFeaturedRepos(language);
+        console.log(language)
+        //clear old content
+        repoContainerEl.textContent = "";
+    }
+};  
+
+var getFeaturedRepos = function(language) {
+    var apiUrl = "https://api.github.com/search/repositories?q=" + language + "+is:featured&sort=help-wanted-issues";
+
+    fetch(apiUrl).then(function(response) {
+        if(response.ok) {
+            response.json().then(function(data) {
+                displayRepos(data.items, language);
+            });
+        } else {
+            alert('Error: ' + response.statusText);
+        }
+    });
+};
+
 
 var fromSubmitHandler = function(event) {
     event.preventDefault();
@@ -34,6 +58,9 @@ var fromSubmitHandler = function(event) {
 
     if (username) {
         getUserRepos(username);
+
+        //clear old content
+        repoContainerEl.textContent = "";
         nameInputEl.value = "";
     } else {
         alert("Please enter a GitHub username");
@@ -47,8 +74,9 @@ var displayRepos = function(repos,searchTerm) {
         repoContainerEl.textContent = "No repositories found.";
         return;
     }
-    // clear old content
-    repoContainerEl.textContent = "";
+    
+    repoSearchTerm.textContent = searchTerm;
+
     // loop over repos
     for (var i = 0; i < repos.length; i++) {
         // format repo name
@@ -80,12 +108,12 @@ var displayRepos = function(repos,searchTerm) {
         //append to container
         repoEl.appendChild(statusEl);
   
-    // append container to the dom
-    repoContainerEl.appendChild(repoEl);
-  }    repoSearchTerm.textContent = searchTerm;
-    
-    console.log(repos);
-    console.log(searchTerm);
-}
+        // append container to the dom
+        repoContainerEl.appendChild(repoEl);
+    };
+};
 
+
+
+languageButtonsEl.addEventListener("click", buttonClickHandler);
 userFormEl.addEventListener("submit", fromSubmitHandler);
